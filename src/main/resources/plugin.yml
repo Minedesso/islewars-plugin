@@ -1,5 +1,23 @@
 name: islewars-plugin
 version: '${version}'
 
-main: de.minedesso.islewarsPlugin.IslewarsPlugin
+main: de.minedesso.islewars.IslewarsPlugin
 api-version: '1.21'
+
+commands:
+  start:
+    description: Verkürzt den Lobby-Countdown auf drei Sekunden.
+    usage: /start
+    permission: islewars.command.start
+  setlobby:
+    description: Speichert den aktuellen Standort als Lobby-Spawn.
+    usage: /setlobby
+    permission: islewars.command.setlobby
+
+permissions:
+  islewars.command.start:
+    description: Erlaubt das manuelle Starten einer IsleWars-Runde.
+    default: op
+  islewars.command.setlobby:
+    description: Erlaubt das Setzen des Lobby-Spawns.
+    default: op
