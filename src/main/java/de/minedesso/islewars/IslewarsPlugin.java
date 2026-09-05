@@ -1,24 +1,27 @@
 package de.minedesso.islewars;
 
 import de.minedesso.islewars.application.lobby.LobbyCoordinator;
+import de.minedesso.islewars.application.lobby.FactionSelectionMenu;
 import de.minedesso.islewars.application.lobby.LobbyItemService;
 import de.minedesso.islewars.application.lobby.LobbyPlayerService;
 import de.minedesso.islewars.application.port.out.IsleWarsApiPort;
 import de.minedesso.islewars.application.service.BootstrapService;
 import de.minedesso.islewars.application.service.CountdownService;
 import de.minedesso.islewars.application.service.GameStateService;
+import de.minedesso.islewars.application.service.FactionSelectionService;
 import de.minedesso.islewars.application.service.ServerRuntimeService;
 import de.minedesso.islewars.domain.model.GameState;
 import de.minedesso.islewars.domain.state.PreGameStateHandler;
 import de.minedesso.islewars.infrastructure.api.JavaNetIsleWarsApiAdapter;
+import de.minedesso.islewars.infrastructure.bukkit.BukkitGameStartAction;
 import de.minedesso.islewars.infrastructure.bukkit.BukkitLobbyAudience;
 import de.minedesso.islewars.infrastructure.bukkit.BukkitTaskScheduler;
 import de.minedesso.islewars.infrastructure.config.IsleWarsApiConfiguration;
 import de.minedesso.islewars.trigger.command.SetLobbyCommand;
 import de.minedesso.islewars.trigger.command.StartCommand;
 import de.minedesso.islewars.trigger.listener.LobbyProtectionListener;
+import de.minedesso.islewars.trigger.listener.InventoryProtectionListener;
 import de.minedesso.islewars.trigger.listener.PlayerLifecycleListener;
-import de.minedesso.islewars.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -63,14 +66,16 @@ public final class IslewarsPlugin extends JavaPlugin {
         GameStateService gameStateService = new GameStateService(
                 List.of(new PreGameStateHandler()), GameState.PRE_GAME);
         ServerRuntimeService runtimeService = new ServerRuntimeService();
-        LobbyItemService itemService = LobbyItemService.withPlaceholderActions();
+        FactionSelectionService factionSelectionService = new FactionSelectionService();
+        FactionSelectionMenu factionSelectionMenu = new FactionSelectionMenu(runtimeService, factionSelectionService);
+        LobbyItemService itemService = LobbyItemService.withTeamSelectionAction(factionSelectionMenu::open);
         LobbyPlayerService playerService = new LobbyPlayerService(runtimeService, itemService);
 
         this.countdownService = new CountdownService(
                 runtimeService,
                 new BukkitLobbyAudience(),
                 scheduler,
-                () -> Bukkit.broadcastMessage(Message.SUCCESS.with("Das Spiel startet jetzt!"))
+                new BukkitGameStartAction(runtimeService, factionSelectionService, factionSelectionMenu)
         );
         LobbyCoordinator lobbyCoordinator = new LobbyCoordinator(playerService, this.countdownService);
 
@@ -78,9 +83,11 @@ public final class IslewarsPlugin extends JavaPlugin {
         this.registerCommand("setlobby", new SetLobbyCommand(
                 apiPort, runtimeService, playerService, lobbyCoordinator, scheduler));
         Bukkit.getPluginManager().registerEvents(
-                new PlayerLifecycleListener(runtimeService, playerService, this.countdownService), this);
+                new PlayerLifecycleListener(runtimeService, playerService, this.countdownService,
+                        factionSelectionService, factionSelectionMenu), this);
         Bukkit.getPluginManager().registerEvents(
                 new LobbyProtectionListener(gameStateService, itemService, playerService), this);
+        Bukkit.getPluginManager().registerEvents(new InventoryProtectionListener(gameStateService), this);
 
         this.bootstrapService = new BootstrapService(
                 apiPort,

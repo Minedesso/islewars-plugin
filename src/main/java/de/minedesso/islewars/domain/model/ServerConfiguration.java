@@ -18,6 +18,10 @@ public record ServerConfiguration(
         if (maximumPlayers < minimumPlayers) {
             throw new IllegalArgumentException("maximumPlayers darf nicht kleiner als minimumPlayers sein.");
         }
+        if (maximumPlayers > mode.maximumCapacity()) {
+            throw new IllegalArgumentException("maximumPlayers überschreitet die Kapazität des Modus "
+                    + mode.apiValue() + ".");
+        }
         if (countdownSeconds < 1) {
             throw new IllegalArgumentException("countdownSeconds muss mindestens 1 sein.");
         }

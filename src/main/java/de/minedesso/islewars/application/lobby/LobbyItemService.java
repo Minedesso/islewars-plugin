@@ -22,11 +22,16 @@ public final class LobbyItemService {
     }
 
     public static LobbyItemService withPlaceholderActions() {
+        return withTeamSelectionAction(player ->
+                player.sendMessage(Message.WARNING.with("Die Team-Auswahl ist noch nicht verfügbar.")));
+    }
+
+    public static LobbyItemService withTeamSelectionAction(LobbyItemAction teamSelectionAction) {
+        Objects.requireNonNull(teamSelectionAction, "teamSelectionAction");
         Map<LobbyItemType, LobbyItemAction> actions = new EnumMap<>(LobbyItemType.class);
         actions.put(LobbyItemType.MAP_SELECTION, player ->
                 player.sendMessage(Message.WARNING.with("Die Map-Auswahl ist noch nicht verfügbar.")));
-        actions.put(LobbyItemType.TEAM_SELECTION, player ->
-                player.sendMessage(Message.WARNING.with("Die Team-Auswahl ist noch nicht verfügbar.")));
+        actions.put(LobbyItemType.TEAM_SELECTION, teamSelectionAction);
         actions.put(LobbyItemType.FUN_AREA, player ->
                 player.sendMessage(Message.WARNING.with("Die Spaß-Area ist noch nicht verfügbar.")));
         return new LobbyItemService(actions);

@@ -1,7 +1,9 @@
 package de.minedesso.islewars.trigger.listener;
 
 import de.minedesso.islewars.application.lobby.LobbyPlayerService;
+import de.minedesso.islewars.application.lobby.FactionSelectionMenu;
 import de.minedesso.islewars.application.service.CountdownService;
+import de.minedesso.islewars.application.service.FactionSelectionService;
 import de.minedesso.islewars.application.service.ServerRuntimeService;
 import de.minedesso.islewars.util.Message;
 import org.bukkit.Bukkit;
@@ -21,15 +23,21 @@ public final class PlayerLifecycleListener implements Listener {
     private final ServerRuntimeService runtimeService;
     private final LobbyPlayerService playerService;
     private final CountdownService countdownService;
+    private final FactionSelectionService factionSelectionService;
+    private final FactionSelectionMenu factionSelectionMenu;
 
     public PlayerLifecycleListener(
             ServerRuntimeService runtimeService,
             LobbyPlayerService playerService,
-            CountdownService countdownService
+            CountdownService countdownService,
+            FactionSelectionService factionSelectionService,
+            FactionSelectionMenu factionSelectionMenu
     ) {
         this.runtimeService = runtimeService;
         this.playerService = playerService;
         this.countdownService = countdownService;
+        this.factionSelectionService = factionSelectionService;
+        this.factionSelectionMenu = factionSelectionMenu;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -63,6 +71,9 @@ public final class PlayerLifecycleListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent event) {
+        if (this.factionSelectionService.remove(event.getPlayer().getUniqueId()).isPresent()) {
+            this.factionSelectionMenu.refreshOpenMenus();
+        }
         if (this.runtimeService.isReady()) {
             UUID leavingPlayerId = event.getPlayer().getUniqueId();
             int remainingPlayers = (int) Bukkit.getOnlinePlayers().stream()

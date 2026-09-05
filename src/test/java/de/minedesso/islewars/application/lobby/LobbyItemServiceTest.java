@@ -8,6 +8,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,5 +45,15 @@ class LobbyItemServiceTest {
         assertTrue(this.player.nextMessage().endsWith("Die Map-Auswahl ist noch nicht verfügbar."));
 
         assertFalse(this.service.executeFor(this.player, 4, this.player.getInventory().getItem(0)));
+    }
+
+    @Test
+    void teamSelectionItemExecutesConfiguredMenuAction() {
+        AtomicBoolean opened = new AtomicBoolean();
+        LobbyItemService itemService = LobbyItemService.withTeamSelectionAction(player -> opened.set(true));
+        itemService.giveItems(this.player);
+
+        assertTrue(itemService.executeFor(this.player, 4, this.player.getInventory().getItem(4)));
+        assertTrue(opened.get());
     }
 }
