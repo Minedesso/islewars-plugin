@@ -4,6 +4,7 @@ import de.minedesso.islewars.application.port.in.GameStartAction;
 import de.minedesso.islewars.application.port.out.LobbyAudience;
 import de.minedesso.islewars.application.port.out.TaskScheduler;
 import de.minedesso.islewars.domain.model.ServerConfiguration;
+import de.minedesso.islewars.util.Message;
 
 import java.util.Set;
 
@@ -45,7 +46,8 @@ public final class CountdownService {
                     : this.runtimeService.requireConfiguration().minimumPlayers();
             if (playerCount < requiredPlayers) {
                 this.cancelCountdown();
-                this.audience.broadcast("§cDer Countdown wurde abgebrochen: Es sind zu wenige Spieler in der Lobby.");
+                this.audience.broadcast(Message.ERROR.with(
+                        "Der Countdown wurde abgebrochen: Es sind zu wenige Spieler in der Lobby."));
             }
             return;
         }
@@ -70,8 +72,8 @@ public final class CountdownService {
             return ForceStartResult.ALREADY_RUNNING;
         }
 
-        this.audience.broadcast("§e" + playerName
-                + " war wohl zu ungeduldig – das Spiel startet in drei Sekunden!");
+        this.audience.broadcast(Message.WARNING.with(playerName
+                + " war wohl zu ungeduldig – das Spiel startet in drei Sekunden!"));
 
         if (this.status == Status.RUNNING) {
             this.forced = true;
@@ -109,7 +111,8 @@ public final class CountdownService {
         this.forced = forced;
         this.remainingSeconds = seconds;
         if (!forced) {
-            this.audience.broadcast("§eDas Spiel startet in " + seconds + " Sekunden.");
+            this.audience.broadcast(Message.WARNING.with(
+                    "Das Spiel startet in " + seconds + " Sekunden."));
         }
         this.task = this.scheduler.runRepeating(this::tick, 20L, 20L);
     }
@@ -124,7 +127,8 @@ public final class CountdownService {
                 : this.runtimeService.requireConfiguration().minimumPlayers();
         if (this.audience.playerCount() < requiredPlayers) {
             this.cancelCountdown();
-            this.audience.broadcast("§cDer Countdown wurde abgebrochen: Es sind zu wenige Spieler in der Lobby.");
+            this.audience.broadcast(Message.ERROR.with(
+                    "Der Countdown wurde abgebrochen: Es sind zu wenige Spieler in der Lobby."));
             return;
         }
 
@@ -140,8 +144,9 @@ public final class CountdownService {
         }
 
         if (MILESTONES.contains(this.remainingSeconds)) {
-            this.audience.broadcast("§eDas Spiel startet in " + this.remainingSeconds
-                    + (this.remainingSeconds == 1 ? " Sekunde." : " Sekunden."));
+            this.audience.broadcast(Message.WARNING.with(
+                    "Das Spiel startet in " + this.remainingSeconds
+                            + (this.remainingSeconds == 1 ? " Sekunde." : " Sekunden.")));
         }
     }
 

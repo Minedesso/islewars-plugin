@@ -18,6 +18,7 @@ import de.minedesso.islewars.trigger.command.SetLobbyCommand;
 import de.minedesso.islewars.trigger.command.StartCommand;
 import de.minedesso.islewars.trigger.listener.LobbyProtectionListener;
 import de.minedesso.islewars.trigger.listener.PlayerLifecycleListener;
+import de.minedesso.islewars.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -69,7 +70,7 @@ public final class IslewarsPlugin extends JavaPlugin {
                 runtimeService,
                 new BukkitLobbyAudience(),
                 scheduler,
-                () -> Bukkit.broadcastMessage("§aDas Spiel startet jetzt!")
+                () -> Bukkit.broadcastMessage(Message.SUCCESS.with("Das Spiel startet jetzt!"))
         );
         LobbyCoordinator lobbyCoordinator = new LobbyCoordinator(playerService, this.countdownService);
 

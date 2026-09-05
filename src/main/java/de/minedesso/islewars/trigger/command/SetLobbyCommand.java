@@ -6,7 +6,7 @@ import de.minedesso.islewars.application.port.out.IsleWarsServerRepository;
 import de.minedesso.islewars.application.port.out.TaskScheduler;
 import de.minedesso.islewars.application.service.ServerRuntimeService;
 import de.minedesso.islewars.domain.model.LobbySpawn;
-import org.bukkit.ChatColor;
+import de.minedesso.islewars.util.Message;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -39,11 +39,12 @@ public final class SetLobbyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.RED + "Dieser Befehl kann nur von einem Spieler ausgeführt werden.");
+            sender.sendMessage(Message.ERROR.with(
+                    "Dieser Befehl kann nur von einem Spieler ausgeführt werden."));
             return true;
         }
         if (args != null && args.length > 0) {
-            player.sendMessage(ChatColor.RED + "Verwendung: /setlobby");
+            player.sendMessage(Message.ERROR.with("Verwendung: /setlobby"));
             return true;
         }
 
@@ -56,7 +57,7 @@ public final class SetLobbyCommand implements CommandExecutor {
                 location.getYaw(),
                 location.getPitch()
         );
-        player.sendMessage(ChatColor.YELLOW + "Lobby-Spawn wird gespeichert ...");
+        player.sendMessage(Message.WARNING.with("Lobby-Spawn wird gespeichert ..."));
 
         this.repository.saveLobbySpawn(lobbySpawn).whenComplete((ignored, throwable) ->
                 this.scheduler.runSync(() -> {
@@ -64,14 +65,14 @@ public final class SetLobbyCommand implements CommandExecutor {
                         Throwable cause = throwable instanceof CompletionException && throwable.getCause() != null
                                 ? throwable.getCause()
                                 : throwable;
-                        player.sendMessage(ChatColor.RED + "Lobby-Spawn konnte nicht gespeichert werden: "
-                                + cause.getMessage());
+                        player.sendMessage(Message.ERROR.with(
+                                "Lobby-Spawn konnte nicht gespeichert werden: " + cause.getMessage()));
                         return;
                     }
 
                     boolean becameReady = this.runtimeService.updateLobbySpawn(
                             lobbySpawn, this.playerService::isSpawnAvailable);
-                    player.sendMessage(ChatColor.GREEN + "Lobby-Spawn wurde gespeichert.");
+                    player.sendMessage(Message.SUCCESS.with("Lobby-Spawn wurde gespeichert."));
                     if (becameReady) {
                         this.lobbyCoordinator.activateReadyLobby();
                     }

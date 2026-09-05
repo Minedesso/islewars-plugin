@@ -1,6 +1,6 @@
 package de.minedesso.islewars.application.lobby;
 
-import org.bukkit.ChatColor;
+import de.minedesso.islewars.util.Message;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,11 +24,11 @@ public final class LobbyItemService {
     public static LobbyItemService withPlaceholderActions() {
         Map<LobbyItemType, LobbyItemAction> actions = new EnumMap<>(LobbyItemType.class);
         actions.put(LobbyItemType.MAP_SELECTION, player ->
-                player.sendMessage(ChatColor.YELLOW + "Die Map-Auswahl ist noch nicht verfügbar."));
+                player.sendMessage(Message.WARNING.with("Die Map-Auswahl ist noch nicht verfügbar.")));
         actions.put(LobbyItemType.TEAM_SELECTION, player ->
-                player.sendMessage(ChatColor.YELLOW + "Die Team-Auswahl ist noch nicht verfügbar."));
+                player.sendMessage(Message.WARNING.with("Die Team-Auswahl ist noch nicht verfügbar.")));
         actions.put(LobbyItemType.FUN_AREA, player ->
-                player.sendMessage(ChatColor.YELLOW + "Die Spaß-Area ist noch nicht verfügbar."));
+                player.sendMessage(Message.WARNING.with("Die Spaß-Area ist noch nicht verfügbar.")));
         return new LobbyItemService(actions);
     }
 

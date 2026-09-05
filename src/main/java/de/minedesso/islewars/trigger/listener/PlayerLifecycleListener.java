@@ -3,6 +3,7 @@ package de.minedesso.islewars.trigger.listener;
 import de.minedesso.islewars.application.lobby.LobbyPlayerService;
 import de.minedesso.islewars.application.service.CountdownService;
 import de.minedesso.islewars.application.service.ServerRuntimeService;
+import de.minedesso.islewars.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,7 +39,8 @@ public final class PlayerLifecycleListener implements Listener {
         }
         int maximumPlayers = this.runtimeService.requireConfiguration().maximumPlayers();
         if (Bukkit.getOnlinePlayers().size() >= maximumPlayers) {
-            event.disallow(PlayerLoginEvent.Result.KICK_FULL, "§cDie IsleWars-Lobby ist bereits voll.");
+            event.disallow(PlayerLoginEvent.Result.KICK_FULL,
+                    Message.ERROR.with("Die IsleWars-Lobby ist bereits voll."));
         }
     }
 
@@ -50,7 +52,8 @@ public final class PlayerLifecycleListener implements Listener {
                 return;
             }
             event.setJoinMessage(null);
-            event.getPlayer().kickPlayer("§cDie IsleWars-Lobby wird noch initialisiert. Bitte versuche es gleich erneut.");
+            event.getPlayer().kickPlayer(Message.ERROR.with(
+                    "Die IsleWars-Lobby wird noch initialisiert. Bitte versuche es gleich erneut."));
             return;
         }
 

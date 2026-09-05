@@ -2,6 +2,7 @@ package de.minedesso.islewars.application.lobby;
 
 import de.minedesso.islewars.application.service.ServerRuntimeService;
 import de.minedesso.islewars.domain.model.LobbySpawn;
+import de.minedesso.islewars.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -30,7 +31,8 @@ public final class LobbyPlayerService {
 
     public void prepareSetupPlayer(Player player) {
         this.resetPlayer(player);
-        player.sendMessage("§eDie IsleWars-Lobby ist noch nicht bereit. Setze den Spawn mit /setlobby.");
+        player.sendMessage(Message.WARNING.with(
+                "Die IsleWars-Lobby ist noch nicht bereit. Setze den Spawn mit /setlobby."));
     }
 
     public boolean teleportToLobby(Player player) {
