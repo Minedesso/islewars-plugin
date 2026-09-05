@@ -8,6 +8,7 @@ import java.time.Duration;
 public record IsleWarsApiConfiguration(
         URI baseUri,
         String serverId,
+        String clientName,
         String apiKey,
         Duration connectTimeout,
         Duration requestTimeout,
@@ -15,6 +16,11 @@ public record IsleWarsApiConfiguration(
 ) {
     public static IsleWarsApiConfiguration from(FileConfiguration configuration) {
         String path = "isle-wars-api.";
+        String configuredClientName = configuration.getString(path + "name", "");
+        String environmentClientName = System.getenv("ISLEWARS_API_NAME");
+        String clientName = environmentClientName == null || environmentClientName.isBlank()
+                ? configuredClientName
+                : environmentClientName;
         String configuredApiKey = configuration.getString(path + "api-key", "");
         String environmentApiKey = System.getenv("ISLEWARS_API_KEY");
         String apiKey = environmentApiKey == null || environmentApiKey.isBlank()
@@ -40,6 +46,7 @@ public record IsleWarsApiConfiguration(
         return new IsleWarsApiConfiguration(
                 baseUri,
                 serverId,
+                requireText(clientName, "name"),
                 apiKey == null ? "" : apiKey.trim(),
                 Duration.ofMillis(connectTimeoutMillis),
                 Duration.ofMillis(requestTimeoutMillis),

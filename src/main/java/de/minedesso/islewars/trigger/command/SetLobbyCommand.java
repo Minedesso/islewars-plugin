@@ -2,7 +2,7 @@ package de.minedesso.islewars.trigger.command;
 
 import de.minedesso.islewars.application.lobby.LobbyCoordinator;
 import de.minedesso.islewars.application.lobby.LobbyPlayerService;
-import de.minedesso.islewars.application.port.out.IsleWarsServerRepository;
+import de.minedesso.islewars.application.port.out.IsleWarsApiPort;
 import de.minedesso.islewars.application.port.out.TaskScheduler;
 import de.minedesso.islewars.application.service.ServerRuntimeService;
 import de.minedesso.islewars.domain.model.LobbySpawn;
@@ -16,20 +16,20 @@ import org.bukkit.entity.Player;
 import java.util.concurrent.CompletionException;
 
 public final class SetLobbyCommand implements CommandExecutor {
-    private final IsleWarsServerRepository repository;
+    private final IsleWarsApiPort apiPort;
     private final ServerRuntimeService runtimeService;
     private final LobbyPlayerService playerService;
     private final LobbyCoordinator lobbyCoordinator;
     private final TaskScheduler scheduler;
 
     public SetLobbyCommand(
-            IsleWarsServerRepository repository,
+            IsleWarsApiPort apiPort,
             ServerRuntimeService runtimeService,
             LobbyPlayerService playerService,
             LobbyCoordinator lobbyCoordinator,
             TaskScheduler scheduler
     ) {
-        this.repository = repository;
+        this.apiPort = apiPort;
         this.runtimeService = runtimeService;
         this.playerService = playerService;
         this.lobbyCoordinator = lobbyCoordinator;
@@ -59,7 +59,7 @@ public final class SetLobbyCommand implements CommandExecutor {
         );
         player.sendMessage(Message.WARNING.with("Lobby-Spawn wird gespeichert ..."));
 
-        this.repository.saveLobbySpawn(lobbySpawn).whenComplete((ignored, throwable) ->
+        this.apiPort.saveLobbySpawn(lobbySpawn).whenComplete((ignored, throwable) ->
                 this.scheduler.runSync(() -> {
                     if (throwable != null) {
                         Throwable cause = throwable instanceof CompletionException && throwable.getCause() != null

@@ -3,14 +3,14 @@ package de.minedesso.islewars;
 import de.minedesso.islewars.application.lobby.LobbyCoordinator;
 import de.minedesso.islewars.application.lobby.LobbyItemService;
 import de.minedesso.islewars.application.lobby.LobbyPlayerService;
-import de.minedesso.islewars.application.port.out.IsleWarsServerRepository;
+import de.minedesso.islewars.application.port.out.IsleWarsApiPort;
 import de.minedesso.islewars.application.service.BootstrapService;
 import de.minedesso.islewars.application.service.CountdownService;
 import de.minedesso.islewars.application.service.GameStateService;
 import de.minedesso.islewars.application.service.ServerRuntimeService;
 import de.minedesso.islewars.domain.model.GameState;
 import de.minedesso.islewars.domain.state.PreGameStateHandler;
-import de.minedesso.islewars.infrastructure.api.JavaNetIsleWarsServerRepository;
+import de.minedesso.islewars.infrastructure.api.JavaNetIsleWarsApiAdapter;
 import de.minedesso.islewars.infrastructure.bukkit.BukkitLobbyAudience;
 import de.minedesso.islewars.infrastructure.bukkit.BukkitTaskScheduler;
 import de.minedesso.islewars.infrastructure.config.IsleWarsApiConfiguration;
@@ -57,7 +57,7 @@ public final class IslewarsPlugin extends JavaPlugin {
                 .connectTimeout(apiConfiguration.connectTimeout())
                 .executor(this.apiExecutor)
                 .build();
-        IsleWarsServerRepository repository = new JavaNetIsleWarsServerRepository(httpClient, apiConfiguration);
+        IsleWarsApiPort apiPort = new JavaNetIsleWarsApiAdapter(httpClient, apiConfiguration);
         BukkitTaskScheduler scheduler = new BukkitTaskScheduler(this);
 
         GameStateService gameStateService = new GameStateService(
@@ -76,14 +76,14 @@ public final class IslewarsPlugin extends JavaPlugin {
 
         this.registerCommand("start", new StartCommand(this.countdownService));
         this.registerCommand("setlobby", new SetLobbyCommand(
-                repository, runtimeService, playerService, lobbyCoordinator, scheduler));
+                apiPort, runtimeService, playerService, lobbyCoordinator, scheduler));
         Bukkit.getPluginManager().registerEvents(
                 new PlayerLifecycleListener(runtimeService, playerService, this.countdownService), this);
         Bukkit.getPluginManager().registerEvents(
                 new LobbyProtectionListener(gameStateService, itemService, playerService), this);
 
         this.bootstrapService = new BootstrapService(
-                repository,
+                apiPort,
                 runtimeService,
                 scheduler,
                 apiConfiguration.retrySeconds() * 20L,

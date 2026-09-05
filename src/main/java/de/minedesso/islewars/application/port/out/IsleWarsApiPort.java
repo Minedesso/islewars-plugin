@@ -5,7 +5,7 @@ import de.minedesso.islewars.domain.model.ServerConfiguration;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface IsleWarsServerRepository {
+public interface IsleWarsApiPort {
     CompletableFuture<ServerConfiguration> fetchServerConfiguration();
 
     CompletableFuture<Void> saveLobbySpawn(LobbySpawn lobbySpawn);

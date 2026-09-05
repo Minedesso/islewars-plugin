@@ -1,6 +1,6 @@
 package de.minedesso.islewars.application.service;
 
-import de.minedesso.islewars.application.port.out.IsleWarsServerRepository;
+import de.minedesso.islewars.application.port.out.IsleWarsApiPort;
 import de.minedesso.islewars.application.port.out.TaskScheduler;
 import de.minedesso.islewars.domain.model.LobbySpawn;
 
@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class BootstrapService {
-    private final IsleWarsServerRepository repository;
+    private final IsleWarsApiPort apiPort;
     private final ServerRuntimeService runtimeService;
     private final TaskScheduler scheduler;
     private final long retryTicks;
@@ -25,7 +25,7 @@ public final class BootstrapService {
     private boolean stopped;
 
     public BootstrapService(
-            IsleWarsServerRepository repository,
+            IsleWarsApiPort apiPort,
             ServerRuntimeService runtimeService,
             TaskScheduler scheduler,
             long retryTicks,
@@ -33,7 +33,7 @@ public final class BootstrapService {
             Runnable onReady,
             Logger logger
     ) {
-        this.repository = repository;
+        this.apiPort = apiPort;
         this.runtimeService = runtimeService;
         this.scheduler = scheduler;
         this.retryTicks = Math.max(20L, retryTicks);
@@ -60,7 +60,7 @@ public final class BootstrapService {
             return;
         }
 
-        this.repository.fetchServerConfiguration().whenComplete((configuration, throwable) ->
+        this.apiPort.fetchServerConfiguration().whenComplete((configuration, throwable) ->
                 this.scheduler.runSync(() -> {
                     this.requestInFlight.set(false);
                     if (this.stopped) {
